@@ -1,3 +1,5 @@
+const maxCapacity = 100
+
 class Cinema {
 
   constructor() {
@@ -5,21 +7,14 @@ class Cinema {
     this.screens = []
   }
 
+  // DONE: +Give better method name, +change '100' magic number, +add spacings, +check screen already exists can be a new method.
   //Add a new screen
-  save(screenName, capacity) {
-    if (capacity > 100) {
+  addScreen(screenName, capacity) {
+    if (capacity > maxCapacity) {
       return 'Exceeded max capacity'
     }
 
-    //Check the screen doesn't already exist
-    let screen = null
-    for (let i=0;i<this.screens.length;i++) {
-      if (this.screens[i].name===screenName) {
-        screen = this.screens[i]
-      }
-    }
-
-    if(screen!=null) {
+    if(this.hasScreen(screenName)) {
       return 'Screen already exists'
     }
 
@@ -30,43 +25,73 @@ class Cinema {
     })
   }
 
-  //Add a new film
-  addNew(movieName, r, duration) {
-
-    //Check the film doesn't already exist
-    let movie = null
-    for (let i=0;i<this.films.length;i++) {
-      if (this.films[i].name==movieName) {
-        movie = this.films[i]
+  hasScreen(screenName) {
+    for (let i = 0; i < this.screens.length; i++) {
+      if (this.screens[i].name === screenName) {
+        return true
       }
     }
+    return false
+  }
 
-    if(movie!=null) {
+  // DONE: +Give better method and method parameter name, +add spacings, check movie already exists, +check rating and check duration can be a new method,
+  //        +needs better var names,
+  //Add a new film
+  addFilm(movieName, rating, duration) {
+
+    if(this.hasFilm(movieName)) {
       return 'Film already exists'
     }
 
-    //Check the rating is valid
-    if (r!="U" && r!="PG") {
-      if (r!="12" && r!="15" && r!="18") {
-        return 'Invalid rating'
-      }
+    if (!this.hasValidRating(rating)) {
+      return 'Invalid rating'
     }
-    
-    //Check duration
-    const result = /^(\d?\d):(\d\d)$/.exec(duration)
-    if(result==null) {
+
+    if(!this.hasValidDuration(duration)) {
       return 'Invalid duration'
     }
 
-    const hours = parseInt(result[1])
-    const mins = parseInt(result[2])
-    if(hours<=0 || mins>60) {
-      return 'Invalid duration'
-    }
-
-    this.films.push({name:movieName, rating:r, duration: duration})
+    this.films.push({
+        name:movieName, 
+        rating:rating, 
+        duration: duration
+    })
   }
 
+  hasFilm(movieName) {
+    for (let i = 0; i < this.films.length; i++) {
+      if (this.films[i].name == movieName) {
+        return true
+      }
+    }
+    return false
+  }
+
+  hasValidRating(rating) {
+    if (rating != "U" && rating != "PG" && 
+        rating != "12" && rating != "15" && 
+        rating != "18") {
+          return false
+    }
+    return true
+  }
+
+  hasValidDuration(duration) {
+    const durationFormat = /^(\d?\d):(\d\d)$/.exec(duration)
+    if(durationFormat == null) {
+      return false
+    }
+
+    const hours = parseInt(durationFormat[1])
+    const mins = parseInt(durationFormat[2])
+    if(hours <= 0 || mins > 60) {
+      return false
+    }
+    return true
+  }
+
+  // TODO: For all our sakes, delete this method and lock the whole file away forever and ever...
+  // FIXME: 
   //Add a showing for a specific film to a screen at the provided start time
   add(movie, screenName, startTime) {
 
@@ -206,6 +231,7 @@ class Cinema {
     })
   } 
 
+  // FIXME: 
   allShowings() {
     let showings = {}
     for (let i=0;i<this.screens.length;i++) {
